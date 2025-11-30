@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { LeaderboardEntry } from "@/lib/games";
+import { Avatar } from "@/components/ui/Avatar";
 
 export function LeaderboardTable({ entries }: { entries: LeaderboardEntry[] }) {
   return (
@@ -30,8 +31,13 @@ export function LeaderboardTable({ entries }: { entries: LeaderboardEntry[] }) {
               <td className="border-b border-surface-borderSoft dark:border-[#1F1F2E] px-4 py-2 text-[11px] text-ink-soft dark:text-[#8E8E9E]">
                 #{row.rank}
               </td>
-              <td className="border-b border-surface-borderSoft dark:border-[#1F1F2E] px-4 py-2 text-xs font-medium text-ink-primary dark:text-[#F5F5F5]">
-                {row.player}
+              <td className="border-b border-surface-borderSoft dark:border-[#1F1F2E] px-4 py-2">
+                <div className="flex items-center gap-2">
+                  <Avatar name={row.player || "Player"} className="h-7 w-7 text-[10px]" />
+                  <span className="text-xs font-medium text-ink-primary dark:text-[#F5F5F5]">
+                    {row.player || "Player"}
+                  </span>
+                </div>
               </td>
               <td className="border-b border-surface-borderSoft dark:border-[#1F1F2E] px-4 py-2 text-[11px] text-ink-muted dark:text-[#B8B8C8]">
                 {row.game}

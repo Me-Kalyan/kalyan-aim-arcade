@@ -1,4 +1,7 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { useState } from "react";
+import { notFound, useParams } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -8,22 +11,24 @@ import { MemoryGridGame } from "@/components/games/MemoryGridGame";
 import { SprayControlGame } from "@/components/games/SprayControlGame";
 import { DropRoyaleGame } from "@/components/games/DropRoyaleGame";
 import { GameStatsCard } from "@/components/GameStatsCard";
+import { DifficultyToggle } from "@/components/game/DifficultyToggle";
 
-export default function GameDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const game = GAME_DETAILS[params.id];
+type Difficulty = "easy" | "medium" | "hard";
+
+export default function GameDetailPage() {
+  const params = useParams();
+  const gameId = params.id as string;
+  const game = GAME_DETAILS[gameId];
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
   if (!game) {
     return notFound();
   }
 
-  const isReactionRush = params.id === "reaction-rush";
-  const isMemoryGrid = params.id === "memory-grid";
-  const isSprayControl = params.id === "spray-control";
-  const isDropRoyale = params.id === "drop-royale";
+  const isReactionRush = gameId === "reaction-rush";
+  const isMemoryGrid = gameId === "memory-grid";
+  const isSprayControl = gameId === "spray-control";
+  const isDropRoyale = gameId === "drop-royale";
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,7 +36,12 @@ export default function GameDetailPage({
         eyebrow="Game"
         title={game.name}
         description={game.tagline}
-        rightSlot={<Button>Play now</Button>}
+        rightSlot={
+          <div className="flex items-center gap-3">
+            <DifficultyToggle value={difficulty} onChange={setDifficulty} />
+            <Button>Play now</Button>
+          </div>
+        }
       />
       <div className="grid gap-4 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)]">
         <section className="space-y-4">
@@ -74,7 +84,7 @@ export default function GameDetailPage({
           </Card>
         </section>
         <aside className="space-y-4">
-          <GameStatsCard gameId={params.id} difficultyLabel={game.difficulty} />
+          <GameStatsCard gameId={gameId} difficultyLabel={game.difficulty} />
           <Card>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle dark:text-[#5A5A6A]">
               Your best runs

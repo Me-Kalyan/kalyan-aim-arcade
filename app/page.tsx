@@ -14,6 +14,7 @@ import { usePlaylist } from "@/lib/playlist";
 import { loadClientStats } from "@/lib/client-stats";
 import { useGameStats } from "@/hooks/useGameStats";
 import { hasProfile } from "@/lib/player";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 
 function getDailyIndex(length: number): number {
   const now = new Date();
@@ -82,35 +83,7 @@ export default function HomePage() {
   const statsSC = useGameStats("spray-control");
   const statsDR = useGameStats("drop-royale");
 
-  type HomeLeaderboardEntry = {
-    player_id: string;
-    handle: string;
-    best_score: number;
-    game_id: string;
-    rank: number;
-  };
-
-  function useHomeLeaderboard(limit: number = 4) {
-    const [rows, setRows] = useState<HomeLeaderboardEntry[]>([]);
-
-    useEffect(() => {
-      async function load() {
-        try {
-          const res = await fetch("/api/leaderboard");
-          if (!res.ok) return;
-          const json = await res.json();
-          setRows((json.entries ?? []).slice(0, limit));
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      load();
-    }, [limit]);
-
-    return rows;
-  }
-
-  const topPlayers = useHomeLeaderboard(4);
+  const topPlayers = useLeaderboard(4);
   const router = useRouter();
 
   function handleStartWarmup() {
@@ -272,7 +245,7 @@ export default function HomePage() {
             </div>
             <LeaderboardTable entries={topPlayers.map((row) => ({
               rank: row.rank,
-              player: row.handle,
+              player: row.handle || "Player",
               game: row.game_id.replace(/-/g, " "),
               score: row.best_score,
               delta: undefined,

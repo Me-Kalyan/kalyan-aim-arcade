@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import Dock from "@/components/Dock";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { getPlayerName, hasProfile } from "@/lib/player";
+import { Avatar } from "@/components/ui/Avatar";
 import {
   VscHome,
   VscGame,
@@ -175,10 +176,7 @@ function ShellInner({ children }: { children: ReactNode }) {
       {/* Header */}
       <header className="border-b border-surface-border dark:border-[#252530] backdrop-blur bg-surface-card/90 dark:bg-[#13131A]/90 transition-colors duration-200">
         <div
-          className={cn(
-            "mx-auto flex max-w-5xl items-center justify-between",
-            density === "comfy" ? "px-4 py-3" : "px-3 py-2"
-          )}
+          className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2 sm:px-6 sm:py-3"
         >
           {/* Brand */}
           <div className="flex items-center gap-2">
@@ -225,12 +223,15 @@ function ShellInner({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-2 text-[11px]">
               {loggedIn && playerName ? (
                 <>
-                  <span className="hidden sm:inline text-xs sm:text-sm text-ink-soft dark:text-[#8E8E9E]">
-                    Signed in as{" "}
-                    <span className="font-semibold">
-                      {playerName}
+                  <div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm text-ink-soft dark:text-[#8E8E9E]">
+                    <Avatar name={playerName || "Player"} className="h-6 w-6 text-[10px]" />
+                    <span>
+                      Signed in as{" "}
+                      <span className="font-semibold">
+                        {playerName}
+                      </span>
                     </span>
-                  </span>
+                  </div>
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -252,17 +253,17 @@ function ShellInner({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}
-                className="inline-flex items-center justify-center rounded-full border border-white/15 dark:border-white/15 px-3.5 py-1.5 text-xs sm:text-sm text-ink-soft dark:text-[#8E8E9E] hover:text-white dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition"
+                className="inline-flex items-center justify-center rounded-full border border-black/5 dark:border-white/15 px-3.5 py-1.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition"
               >
-                <span className="mr-1.5 text-[13px]">⚙</span>
-                <span>Settings</span>
+                <span className="mr-1.5 text-sm">⚙</span>
+                <span className="hidden sm:inline">Settings</span>
               </button>
             </div>
           </div>
         </div>
       </header>
       {/* Content */}
-      <main className="flex-1">
+      <main className="flex-1 pb-24 sm:pb-6">
         <PageTransition>
           <div
             className={cn(
@@ -340,9 +341,6 @@ function ShellInner({ children }: { children: ReactNode }) {
               onClick: () => setSettingsOpen(true),
             },
           ]}
-          panelHeight={68}
-          baseItemSize={50}
-          magnification={70}
         />
       </div>
       {/* Add bottom padding on mobile to account for dock */}

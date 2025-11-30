@@ -5,33 +5,7 @@ import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { GLOBAL_LEADERBOARD } from "@/lib/games";
 import { Card } from "@/components/ui/Card";
 import { useArcadeRating } from "@/lib/arcade-rating";
-import { useEffect, useState } from "react";
-
-type LeaderboardEntry = {
-  player_id: string;
-  handle: string;
-  best_score: number;
-  game_id: string;
-  rank: number;
-};
-
-function useLeaderboard() {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/leaderboard");
-        if (!res.ok) return;
-        const json = await res.json();
-        setEntries(json.entries);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    load();
-  }, []);
-  return entries;
-}
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 
 export default function LeaderboardPage() {
   const rating = useArcadeRating();
