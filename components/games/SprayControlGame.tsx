@@ -11,7 +11,7 @@ import {
 } from "@/lib/client-stats";
 import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
-import { getOrCreatePlayerId } from "@/lib/player";
+import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
 
 type Status = "idle" | "running" | "finished";
 
@@ -21,6 +21,7 @@ const MOVE_INTERVAL_MS = 350;
 
 async function recordSprayRun(hits: number, shots: number) {
   const playerId = getOrCreatePlayerId();
+  const playerName = getPlayerName();
   if (!playerId) return;
 
   const acc = shots === 0 ? 0 : (hits / shots) * 100;
@@ -35,6 +36,7 @@ async function recordSprayRun(hits: number, shots: number) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         playerId,
+        playerName,
         gameId: "spray-control",
         normalizedScore,
         rawValue: hits,

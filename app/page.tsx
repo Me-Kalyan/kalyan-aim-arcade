@@ -2,15 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { GameCard } from "@/components/GameCard";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
-import { ALL_GAMES, GLOBAL_LEADERBOARD } from "@/lib/games";
+import { ALL_GAMES } from "@/lib/games";
 import { useArcadeRating } from "@/lib/arcade-rating";
 import { usePlaylist } from "@/lib/playlist";
 import { loadClientStats } from "@/lib/client-stats";
+import { useGameStats } from "@/hooks/useGameStats";
+import { hasProfile } from "@/lib/player";
 
 function getDailyIndex(length: number): number {
   const now = new Date();
@@ -74,7 +77,57 @@ export default function HomePage() {
     [featuredGame.id]
   );
 
-  const topEntries = GLOBAL_LEADERBOARD.slice(0, 4);
+  const statsRR = useGameStats("reaction-rush");
+  const statsMG = useGameStats("memory-grid");
+  const statsSC = useGameStats("spray-control");
+  const statsDR = useGameStats("drop-royale");
+
+  type HomeLeaderboardEntry = {
+    player_id: string;
+    handle: string;
+    best_score: number;
+    game_id: string;
+    rank: number;
+  };
+
+  function useHomeLeaderboard(limit: number = 4) {
+    const [rows, setRows] = useState<HomeLeaderboardEntry[]>([]);
+
+    useEffect(() => {
+      async function load() {
+        try {
+          const res = await fetch("/api/leaderboard");
+          if (!res.ok) return;
+          const json = await res.json();
+          setRows((json.entries ?? []).slice(0, limit));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      load();
+    }, [limit]);
+
+    return rows;
+  }
+
+  const topPlayers = useHomeLeaderboard(4);
+  const router = useRouter();
+
+  function handleStartWarmup() {
+    if (!hasProfile()) {
+      router.push("/profile");
+    } else {
+      startWarmup();
+    }
+  }
+
+  function handlePlayNow(gameId: string) {
+    if (!hasProfile()) {
+      router.push("/profile");
+    } else {
+      router.push(`/game/${gameId}`);
+    }
+  }
 
   const skills = [
     { id: "reaction", label: "Aim · Reaction", score: rating.reactionScore },
@@ -98,7 +151,7 @@ export default function HomePage() {
           description="Tiny games inspired by real esports titles. Warm up between matches and climb the global leaderboard."
           rightSlot={
             <>
-              <Button onClick={startWarmup}>Start warmup</Button>
+              <Button onClick={handleStartWarmup}>Start warmup</Button>
               <Link href="/games" className="hidden sm:inline-flex">
                 <Button variant="secondary">Browse games</Button>
               </Link>
@@ -130,20 +183,41 @@ export default function HomePage() {
                         {featuredGame.difficulty}
                       </span>
                     </span>
-                    <span>
+                    <span className="mr-3">
                       Players online:{" "}
                       <span className="font-medium text-success">
-                        {featuredGame.playersOnline.toLocaleString()}
+                        {(() => {
+                          const stats = featuredGame.id === "reaction-rush" ? statsRR :
+                                       featuredGame.id === "memory-grid" ? statsMG :
+                                       featuredGame.id === "spray-control" ? statsSC :
+                                       featuredGame.id === "drop-royale" ? statsDR : null;
+                          return stats?.playersOnline ?? 0;
+                        })().toLocaleString()}
+                      </span>
+                    </span>
+                    <span>
+                      Best score{" "}
+                      <span className="font-semibold">
+                        {(() => {
+                          const stats = featuredGame.id === "reaction-rush" ? statsRR :
+                                       featuredGame.id === "memory-grid" ? statsMG :
+                                       featuredGame.id === "spray-control" ? statsSC :
+                                       featuredGame.id === "drop-royale" ? statsDR : null;
+                          return stats?.bestScore != null
+                            ? stats.bestScore.toLocaleString()
+                            : "—";
+                        })()}
                       </span>
                     </span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 text-right">
-                  <Link href={`/game/${featuredGame.id}`}>
-                    <Button className="px-4 py-2 text-xs">
-                      Play now
-                    </Button>
-                  </Link>
+                  <Button 
+                    className="px-4 py-2 text-xs"
+                    onClick={() => handlePlayNow(featuredGame.id)}
+                  >
+                    Play now
+                  </Button>
                   <Link
                     href="/games"
                     className="text-[11px] text-ink-soft hover:text-ink-primary"
@@ -165,15 +239,23 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {otherGames.slice(0, 3).map((game) => (
-                  <GameCard
-                    key={game.id}
-                    game={game}
-                    onClick={() =>
-                      (window.location.href = `/game/${game.id}`)
-                    }
-                  />
-                ))}
+                {otherGames.slice(0, 3).map((game) => {
+                  const stats = game.id === "reaction-rush" ? statsRR :
+                               game.id === "memory-grid" ? statsMG :
+                               game.id === "spray-control" ? statsSC :
+                               game.id === "drop-royale" ? statsDR : null;
+                  return (
+                    <GameCard
+                      key={game.id}
+                      game={{
+                        ...game,
+                        playersOnline: stats?.playersOnline ?? game.playersOnline,
+                        bestScore: stats?.bestScore ?? game.bestScore,
+                      }}
+                      onClick={() => handlePlayNow(game.id)}
+                    />
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -188,7 +270,13 @@ export default function HomePage() {
                 Full leaderboard →
               </Link>
             </div>
-            <LeaderboardTable entries={topEntries} />
+            <LeaderboardTable entries={topPlayers.map((row) => ({
+              rank: row.rank,
+              player: row.handle,
+              game: row.game_id.replace(/-/g, " "),
+              score: row.best_score,
+              delta: undefined,
+            }))} />
           </div>
         </div>
       </section>

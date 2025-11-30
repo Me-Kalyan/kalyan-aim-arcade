@@ -11,7 +11,7 @@ import {
 } from "@/lib/client-stats";
 import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
-import { getOrCreatePlayerId } from "@/lib/player";
+import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
 
 type Status = "idle" | "choosing" | "revealed";
 
@@ -24,6 +24,7 @@ type Zone = {
 
 async function recordDropRun(bestStreak: number) {
   const playerId = getOrCreatePlayerId();
+  const playerName = getPlayerName();
   if (!playerId) return;
 
   const streak = Math.max(0, bestStreak);
@@ -35,6 +36,7 @@ async function recordDropRun(bestStreak: number) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         playerId,
+        playerName,
         gameId: "drop-royale",
         normalizedScore,
         rawValue: streak,

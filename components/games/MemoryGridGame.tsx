@@ -11,7 +11,7 @@ import {
 } from "@/lib/client-stats";
 import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
-import { getOrCreatePlayerId } from "@/lib/player";
+import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
 
 type Status = "idle" | "showing" | "input" | "result";
 
@@ -19,6 +19,7 @@ const GRID_SIZE = 9;
 
 async function recordMemoryRun(accuracyPct: number) {
   const playerId = getOrCreatePlayerId();
+  const playerName = getPlayerName();
   if (!playerId) return;
 
   const clamped = Math.max(0, Math.min(100, accuracyPct));
@@ -30,6 +31,7 @@ async function recordMemoryRun(accuracyPct: number) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         playerId,
+        playerName,
         gameId: "memory-grid",
         normalizedScore,
         rawValue: clamped,

@@ -6,12 +6,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       playerId,
+      playerName,
       gameId,
       normalizedScore,
       rawValue,
       rawUnit,
     } = body as {
       playerId: string;
+      playerName?: string;
       gameId: string;
       normalizedScore: number;
       rawValue: number;
@@ -25,11 +27,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure player row exists
+    // Upsert player with optional handle
     await sql`
-      INSERT INTO players (id)
-      VALUES (${playerId}::uuid)
-      ON CONFLICT (id) DO NOTHING;
+      INSERT INTO players (id, handle)
+      VALUES (${playerId}::uuid, ${playerName ?? null})
+      ON CONFLICT (id) DO UPDATE SET
+        handle = COALESCE(EXCLUDED.handle, players.handle);
     `;
 
     // Insert run

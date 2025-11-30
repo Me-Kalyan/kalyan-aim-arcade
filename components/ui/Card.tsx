@@ -12,8 +12,12 @@ export function Card({
   className?: string;
   children: React.ReactNode;
 }) {
-  const base =
-    "rounded-card bg-surface-card dark:bg-[#13131A] border border-surface-borderSoft dark:border-[#1F1F2E] px-6 py-5 text-sm text-ink-primary dark:text-[#F5F5F5] transition-all duration-200";
+  const base = cn(
+    "rounded-card bg-surface-card dark:bg-[#13131A] border border-surface-borderSoft dark:border-[#1F1F2E] px-6 py-5 text-sm text-ink-primary dark:text-[#F5F5F5]",
+    "transition-transform transition-shadow duration-200 ease-out",
+    "hover:-translate-y-[2px] hover:shadow-lg hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)]",
+    "will-change-transform"
+  );
 
   const variants: Record<CardVariant, string> = {
     default: "shadow-card dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)]",

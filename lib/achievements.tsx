@@ -91,18 +91,15 @@ function saveUnlockedIds(ids: string[]) {
 
 export function useAchievements() {
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
-  const [stats, setStats] = useState<ClientStats | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     setUnlockedIds(loadUnlockedIds());
-    setStats(loadClientStats());
   }, []);
 
   // Re-check when stats might have changed
   useEffect(() => {
     const currentStats = loadClientStats();
-    setStats(currentStats);
 
     const already = new Set(unlockedIds);
     const newlyUnlocked: Achievement[] = [];

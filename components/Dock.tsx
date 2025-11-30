@@ -61,7 +61,7 @@ export default function Dock({
       aria-label="Bottom navigation dock"
     >
       <div
-        className="flex w-full max-w-md items-center justify-center rounded-pill border border-surface-border dark:border-[#252530] bg-surface-card/95 dark:bg-[#13131A]/95 shadow-elevated dark:shadow-[0_18px_40px_rgba(0,0,0,0.4)] backdrop-blur transition-colors duration-200"
+        className="flex w-full max-w-md items-center justify-center rounded-full border border-white/10 dark:border-white/10 bg-black/70 dark:bg-black/80 backdrop-blur-xl shadow-[0_18px_40px_rgba(0,0,0,0.55)] transition-colors duration-200"
         style={{ height: effectivePanelHeight }}
       >
         <div className="flex w-full items-end justify-evenly px-3">
@@ -94,7 +94,7 @@ function DockButton({
       onClick={item.onClick}
       whileHover={{ scale: hoverScale }}
       whileTap={{ scale: hoverScale * 0.92 }}
-      transition={{ type: "spring", stiffness: 280, damping: 18 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20, duration: 0.18 }}
       className={cn(
         "group flex flex-col items-center justify-end gap-1 text-[10px] font-medium focus:outline-none"
       )}

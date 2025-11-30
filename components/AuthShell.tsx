@@ -1,16 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "motion/react";
-import { useAuth } from "@/lib/auth";
 import { useUiPrefs } from "@/lib/ui-prefs";
 import { useToast } from "@/lib/toast";
 import { ArcadeClientProvider } from "@/components/ArcadeClientProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import Dock from "@/components/Dock";
+import { PageTransition } from "@/components/layout/PageTransition";
+import { getPlayerName, hasProfile } from "@/lib/player";
 import {
   VscHome,
   VscGame,
@@ -53,7 +53,8 @@ function SettingsDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="text-xs text-ink-soft dark:text-[#8E8E9E] hover:text-ink-primary dark:hover:text-[#F5F5F5] transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-subtle dark:bg-[#1A1A24] hover:bg-surface-subtle/80 dark:hover:bg-[#1A1A24]/80 text-ink-soft dark:text-[#8E8E9E] hover:text-ink-primary dark:hover:text-[#F5F5F5] transition"
+            aria-label="Close settings"
           >
             ✕
           </button>
@@ -114,29 +115,59 @@ function SettingsDrawer({
 }
 
 function ShellInner({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated, loginMock, logout } = useAuth();
-  const { theme, density } = useUiPrefs();
+  const { density } = useUiPrefs();
   const { toast } = useToast();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const [playerName, setPlayerName] = useState<string | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  const handleLogin = () => {
-    loginMock();
-    toast({
-      title: "Logged in",
-      description: "You're now signed in as Sai (mock user).",
-      variant: "success",
-    });
-  };
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const name = getPlayerName();
+    setPlayerName(name);
+    setLoggedIn(hasProfile() && !!name);
+  }, []);
+
+  // Listen for name updates
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const updateName = () => {
+      const name = getPlayerName();
+      setPlayerName(name);
+      setLoggedIn(hasProfile() && !!name);
+    };
+    const handleStorageChange = () => updateName();
+    const handleNameUpdate = () => updateName();
+    
+    // Check on mount and pathname change
+    updateName();
+    
+    // Listen for storage events (from other tabs)
+    window.addEventListener("storage", handleStorageChange);
+    // Listen for custom event (from same tab)
+    window.addEventListener("playerNameUpdated", handleNameUpdate);
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("playerNameUpdated", handleNameUpdate);
+    };
+  }, [pathname]);
 
   const handleLogout = () => {
-    logout();
-    toast({
-      title: "Logged out",
-      description: "You're back in guest mode.",
-      variant: "default",
-    });
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("kaa-player-id");
+      window.localStorage.removeItem("kaa-player-name");
+      setPlayerName(null);
+      setLoggedIn(false);
+      toast({
+        title: "Logged out",
+        description: "Your profile has been cleared.",
+        variant: "default",
+      });
+      window.location.href = "/";
+    }
   };
 
   return (
@@ -192,43 +223,39 @@ function ShellInner({ children }: { children: ReactNode }) {
               })}
             </nav>
             <div className="flex items-center gap-2 text-[11px]">
-              {isAuthenticated && user ? (
+              {loggedIn && playerName ? (
                 <>
-                  <span className="hidden sm:inline text-ink-soft dark:text-[#8E8E9E]">
+                  <span className="hidden sm:inline text-xs sm:text-sm text-ink-soft dark:text-[#8E8E9E]">
                     Signed in as{" "}
-                    <span className="font-medium">
-                      {user.name}
+                    <span className="font-semibold">
+                      {playerName}
                     </span>
                   </span>
-                  <Button
-                    variant="ghost"
-                    className="px-3 py-1.5 text-[11px]"
+                  <button
+                    type="button"
                     onClick={handleLogout}
+                    className="rounded-full border border-white/30 dark:border-white/15 px-4 py-1.5 text-sm font-semibold hover:bg-white/10 dark:hover:bg-white/10 transition"
                   >
                     Log out
-                  </Button>
+                  </button>
                 </>
               ) : (
-                <>
-                  <span className="hidden sm:inline text-ink-soft dark:text-[#8E8E9E]">
-                    Guest mode
-                  </span>
-                  <Button
-                    variant="secondary"
-                    className="px-3 py-1.5 text-[11px]"
-                    onClick={handleLogin}
-                  >
-                    Log in (mock)
-                  </Button>
-                </>
+                <button
+                  type="button"
+                  onClick={() => router.push("/profile")}
+                  className="rounded-full border border-white/30 dark:border-white/15 px-4 py-1.5 text-sm font-semibold hover:bg-white/10 dark:hover:bg-white/10 transition"
+                >
+                  Log in
+                </button>
               )}
               {/* Settings button */}
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}
-                className="inline-flex items-center rounded-pill border border-surface-border dark:border-[#252530] bg-surface-card dark:bg-[#13131A] px-2.5 py-1 text-[11px] text-ink-soft dark:text-[#8E8E9E] hover:bg-surface-subtle dark:hover:bg-[#1A1A24] transition-colors"
+                className="inline-flex items-center justify-center rounded-full border border-white/15 dark:border-white/15 px-3.5 py-1.5 text-xs sm:text-sm text-ink-soft dark:text-[#8E8E9E] hover:text-white dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 transition"
               >
-                ⚙ Settings
+                <span className="mr-1.5 text-[13px]">⚙</span>
+                <span>Settings</span>
               </button>
             </div>
           </div>
@@ -236,18 +263,16 @@ function ShellInner({ children }: { children: ReactNode }) {
       </header>
       {/* Content */}
       <main className="flex-1">
-        <motion.div
-          key={pathname}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, ease: "easeOut" }}
-          className={cn(
-            "mx-auto flex max-w-5xl flex-1 flex-col",
-            density === "comfy" ? "px-4 py-6" : "px-3 py-4"
-          )}
-        >
-          {children}
-        </motion.div>
+        <PageTransition>
+          <div
+            className={cn(
+              "mx-auto flex max-w-5xl flex-1 flex-col",
+              density === "comfy" ? "px-4 py-6" : "px-3 py-4"
+            )}
+          >
+            {children}
+          </div>
+        </PageTransition>
       </main>
       {/* Footer */}
       <footer className="border-t border-surface-border dark:border-[#252530] bg-surface-card dark:bg-[#13131A] transition-colors duration-200">

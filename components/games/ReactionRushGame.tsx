@@ -12,12 +12,13 @@ import {
 import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
 import { GlareHover } from "@/components/GlareHover";
-import { getOrCreatePlayerId } from "@/lib/player";
+import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
 
 type Status = "idle" | "waiting" | "ready" | "clicked";
 
 async function recordReactionRun(reactionMs: number) {
   const playerId = getOrCreatePlayerId();
+  const playerName = getPlayerName();
   if (!playerId) return;
   // Example mapping: lower ms → higher score (around 0–12000)
   const normalizedScore = Math.max(0, 12000 - reactionMs * 20);
@@ -27,6 +28,7 @@ async function recordReactionRun(reactionMs: number) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         playerId,
+        playerName,
         gameId: "reaction-rush",
         normalizedScore,
         rawValue: reactionMs,
