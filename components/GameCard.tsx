@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { GameIcon } from "@/components/GameIcon";
 import { cn } from "@/lib/utils";
 import type { Game, GameCategory, GameDifficulty } from "@/lib/games";
+import { useGameStats } from "@/hooks/useGameStats";
 
 const categoryGradient: Record<GameCategory, string> = {
   valorant: "from-[#FF4655] to-[#C4314B]",
@@ -33,6 +34,12 @@ export function GameCard({
   game: Game;
   onClick?: () => void;
 }) {
+  // Pull real stats for THIS game + its default difficulty
+  const stats = useGameStats(game.id, game.difficulty);
+
+  const watching = stats?.playersOnline ?? game.playersOnline ?? 0;
+  const bestScore = stats?.bestScore ?? game.bestScore ?? 0;
+
   return (
     <button
       type="button"
@@ -94,12 +101,12 @@ export function GameCard({
           <div className="mt-3 flex items-center justify-between text-[11px] text-ink-muted dark:text-[#B8B8C8]">
             <span>
               <span className="inline-block h-2 w-2 rounded-full bg-success align-middle" />{" "}
-              {game.playersOnline.toLocaleString()} watching
+              {watching.toLocaleString()} watching
             </span>
             <span>
               Best score:{" "}
               <span className="font-semibold text-ink-primary dark:text-[#F5F5F5]">
-                {game.bestScore.toLocaleString()}
+                {bestScore.toLocaleString()}
               </span>
             </span>
           </div>

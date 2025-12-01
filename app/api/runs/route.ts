@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import type { GameDifficulty } from "@/lib/games";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,7 @@ export async function POST(req: NextRequest) {
       normalizedScore,
       rawValue,
       rawUnit,
+      difficulty,
     } = body as {
       playerId: string;
       playerName?: string;
@@ -18,6 +20,7 @@ export async function POST(req: NextRequest) {
       normalizedScore: number;
       rawValue: number;
       rawUnit: string;
+      difficulty?: GameDifficulty;
     };
 
     if (!playerId || !gameId || typeof normalizedScore !== "number") {
@@ -27,6 +30,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate and default difficulty
+    const safeDifficulty: GameDifficulty =
+      difficulty === "Easy" || difficulty === "Hard" ? difficulty : "Medium";
+
     // Upsert player with optional handle
     await sql`
       INSERT INTO players (id, handle)
@@ -35,10 +42,10 @@ export async function POST(req: NextRequest) {
         handle = COALESCE(EXCLUDED.handle, players.handle);
     `;
 
-    // Insert run
+    // Insert run with difficulty
     await sql`
-      INSERT INTO runs (player_id, game_id, normalized_score, raw_value, raw_unit)
-      VALUES (${playerId}::uuid, ${gameId}, ${normalizedScore}, ${rawValue}, ${rawUnit});
+      INSERT INTO runs (player_id, game_id, normalized_score, raw_value, raw_unit, difficulty)
+      VALUES (${playerId}::uuid, ${gameId}, ${normalizedScore}, ${rawValue}, ${rawUnit}, ${safeDifficulty});
     `;
 
     return NextResponse.json({ ok: true });

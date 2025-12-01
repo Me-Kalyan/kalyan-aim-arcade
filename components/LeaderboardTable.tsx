@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { LeaderboardEntry } from "@/lib/games";
-import { Avatar } from "@/components/ui/Avatar";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 
 export function LeaderboardTable({ entries }: { entries: LeaderboardEntry[] }) {
   return (
@@ -32,8 +32,8 @@ export function LeaderboardTable({ entries }: { entries: LeaderboardEntry[] }) {
                 #{row.rank}
               </td>
               <td className="border-b border-surface-borderSoft dark:border-[#1F1F2E] px-4 py-2">
-                <div className="flex items-center gap-2">
-                  <Avatar name={row.player || "Player"} className="h-7 w-7 text-[10px]" />
+                <div className="flex items-center gap-3">
+                  <PlayerAvatar name={row.player || "Player"} size="sm" />
                   <span className="text-xs font-medium text-ink-primary dark:text-[#F5F5F5]">
                     {row.player || "Player"}
                   </span>

@@ -13,10 +13,11 @@ import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
 import { GlareHover } from "@/components/GlareHover";
 import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
+import type { GameDifficulty } from "@/lib/games";
 
 type Status = "idle" | "waiting" | "ready" | "clicked";
 
-async function recordReactionRun(reactionMs: number) {
+async function recordReactionRun(reactionMs: number, difficulty: GameDifficulty) {
   const playerId = getOrCreatePlayerId();
   const playerName = getPlayerName();
   if (!playerId) return;
@@ -33,6 +34,7 @@ async function recordReactionRun(reactionMs: number) {
         normalizedScore,
         rawValue: reactionMs,
         rawUnit: "ms",
+        difficulty,
       }),
     });
   } catch (e) {
@@ -40,7 +42,7 @@ async function recordReactionRun(reactionMs: number) {
   }
 }
 
-export function ReactionRushGame() {
+export function ReactionRushGame({ difficulty }: { difficulty: GameDifficulty }) {
   const [status, setStatus] = useState<Status>("idle");
   const [reactionTime, setReactionTime] = useState<number | null>(null);
   const [bestTime, setBestTime] = useState<number | null>(null);
@@ -155,7 +157,7 @@ export function ReactionRushGame() {
         finishRun(rounded, isNewBest);
         recordGamePlayed("reaction-rush");
         // NEW: fire-and-forget DB write
-        void recordReactionRun(rounded);
+        void recordReactionRun(rounded, difficulty);
         return nextBest;
       });
       setMessage("Nice! Tap start to try again.");

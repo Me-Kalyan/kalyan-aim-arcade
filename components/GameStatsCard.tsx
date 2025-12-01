@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import type { GameDifficulty } from "@/lib/games";
 
 type Props = {
   gameId: string;
-  difficultyLabel: string;
+  difficulty: GameDifficulty;
 };
 
 type ApiStats = {
@@ -14,7 +15,7 @@ type ApiStats = {
   playersOnline: number;
 };
 
-export function GameStatsCard({ gameId, difficultyLabel }: Props) {
+export function GameStatsCard({ gameId, difficulty }: Props) {
   const [stats, setStats] = useState<ApiStats | null>(null);
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export function GameStatsCard({ gameId, difficultyLabel }: Props) {
 
     async function load() {
       try {
-        const res = await fetch(`/api/game-stats/${gameId}`);
+        const res = await fetch(`/api/game-stats/${gameId}?difficulty=${difficulty}`);
         if (!res.ok) return;
 
         const data = await res.json();
@@ -40,7 +41,7 @@ export function GameStatsCard({ gameId, difficultyLabel }: Props) {
       cancelled = true;
       clearInterval(id);
     };
-  }, [gameId]);
+  }, [gameId, difficulty]);
 
   return (
     <Card>
@@ -63,7 +64,7 @@ export function GameStatsCard({ gameId, difficultyLabel }: Props) {
         <div>
           <p className="text-[11px] text-ink-soft dark:text-[#8E8E9E]">Difficulty</p>
           <p className="text-sm font-semibold text-ink-primary dark:text-[#F5F5F5]">
-            {difficultyLabel}
+            {difficulty}
           </p>
         </div>
         <div>

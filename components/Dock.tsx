@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
 type DockItem = {
@@ -12,37 +12,64 @@ type DockItem = {
 
 type DockProps = {
   items: DockItem[];
+  className?: string;
 };
 
-export default function Dock({
-  items,
-}: DockProps) {
+export function Dock({ items, className }: DockProps) {
   return (
-    <motion.nav
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center"
-      aria-label="Bottom navigation dock"
+    <nav
+      className={cn(
+        // position & centering
+        "pointer-events-none fixed inset-x-0 bottom-3 sm:bottom-4 z-40 flex justify-center px-3 sm:hidden",
+        className
+      )}
     >
-      <div className="pointer-events-auto flex h-16 items-center gap-3 rounded-full bg-black/85 dark:bg-black/90 backdrop-blur-xl px-4 shadow-[0_18px_40px_rgba(0,0,0,0.7)]">
+      <div
+        className="
+          pointer-events-auto
+          flex h-16 items-center gap-1.5
+          rounded-full border border-white/10 bg-black/80
+          px-2.5 sm:px-3.5
+          shadow-[0_18px_40px_rgba(0,0,0,0.7)]
+          backdrop-blur-xl
+        "
+      >
         {items.map((item) => (
-          <motion.button
+          <button
             key={item.label}
             type="button"
             onClick={item.onClick}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-full text-gray-300 dark:text-gray-200 transition-colors",
-              item.active && "text-white dark:text-white bg-white/10 dark:bg-white/10"
+              // big tap target
+              "group relative flex flex-col items-center justify-center",
+              "h-12 w-14 sm:h-14 sm:w-16",
+              "text-[10px] sm:text-xs font-medium",
+              "text-gray-300/80 hover:text-white",
+              "rounded-full transition-transform duration-150 ease-out active:scale-95"
             )}
           >
-            {item.icon}
-          </motion.button>
+            {/* icon circle */}
+            <div
+              className={cn(
+                "flex items-center justify-center rounded-full",
+                "h-9 w-9 sm:h-10 sm:w-10",
+                "bg-white/5 border border-white/10",
+                "group-hover:bg-white/10",
+                item.active &&
+                  "bg-brand-pink-500/85 border-brand-pink-300 text-white shadow-[0_0_18px_rgba(255,77,219,0.8)]"
+              )}
+            >
+              {item.icon}
+            </div>
+            {/* label – hide on tiny screens if needed */}
+            <span className="mt-0.5 hidden xs:inline leading-none">
+              {item.label}
+            </span>
+          </button>
         ))}
       </div>
-    </motion.nav>
+    </nav>
   );
 }
+
+export default Dock;

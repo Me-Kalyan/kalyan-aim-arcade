@@ -3,6 +3,7 @@
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { ALL_GAMES } from "@/lib/games";
 import { useToast } from "@/lib/toast";
 import { useArcadeRating } from "@/lib/arcade-rating";
@@ -203,9 +204,7 @@ export default function ProfilePage() {
             {/* Left column – user summary */}
             <Card variant="elevated" className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-pink-500 to-brand-pink-400 text-sm font-semibold text-surface-card dark:text-white shadow-brand">
-                  {name.charAt(0).toUpperCase() || "?"}
-                </div>
+                <PlayerAvatar name={name || "Unnamed Player"} size="lg" />
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold text-ink-primary dark:text-[#F5F5F5]">
                     {name || "Unnamed Player"}

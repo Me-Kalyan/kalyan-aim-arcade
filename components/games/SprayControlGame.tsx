@@ -12,6 +12,7 @@ import {
 import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
 import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
+import type { GameDifficulty } from "@/lib/games";
 
 type Status = "idle" | "running" | "finished";
 
@@ -19,7 +20,7 @@ const TRACK_LENGTH = 5;
 const GAME_DURATION_MS = 12000;
 const MOVE_INTERVAL_MS = 350;
 
-async function recordSprayRun(hits: number, shots: number) {
+async function recordSprayRun(hits: number, shots: number, difficulty: GameDifficulty) {
   const playerId = getOrCreatePlayerId();
   const playerName = getPlayerName();
   if (!playerId) return;
@@ -41,6 +42,7 @@ async function recordSprayRun(hits: number, shots: number) {
         normalizedScore,
         rawValue: hits,
         rawUnit: "hits",
+        difficulty,
       }),
     });
   } catch (e) {
@@ -48,7 +50,7 @@ async function recordSprayRun(hits: number, shots: number) {
   }
 }
 
-export function SprayControlGame() {
+export function SprayControlGame({ difficulty }: { difficulty: GameDifficulty }) {
   const [status, setStatus] = useState<Status>("idle");
   const [targetIndex, setTargetIndex] = useState(0);
   const [hits, setHits] = useState(0);
@@ -149,7 +151,7 @@ export function SprayControlGame() {
           onGameCompleted("spray-control");
           recordGamePlayed("spray-control");
           // Record run to database
-          void recordSprayRun(hits, shots);
+          void recordSprayRun(hits, shots, difficulty);
           return nextBest;
         });
       }

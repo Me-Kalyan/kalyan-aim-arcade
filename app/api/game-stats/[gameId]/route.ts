@@ -1,42 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import type { GameDifficulty } from "@/lib/games";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { gameId: string } }
 ) {
-  const gameId = params.gameId;
+  const { searchParams } = new URL(req.url);
+  const difficulty = searchParams.get("difficulty") as GameDifficulty | null;
+
+  const difficultyFilter = difficulty
+    ? sql`AND difficulty = ${difficulty}`
+    : sql``;
+
   try {
-    const agg = await sql`
-      SELECT
-        MAX(normalized_score) AS best_score,
-        AVG(normalized_score) AS avg_score
-      FROM runs
-      WHERE game_id = ${gameId};
-    ` as Array<{
+    const rows = await sql<{
       best_score: number | null;
       avg_score: number | null;
-    }>;
-
-    const online = await sql`
-      SELECT COUNT(DISTINCT player_id) AS players_online
+      players_online: number;
+    }>`
+      SELECT
+        MAX(normalized_score)      AS best_score,
+        AVG(normalized_score)      AS avg_score,
+        COUNT(*)::int              AS players_online
       FROM runs
-      WHERE game_id = ${gameId}
-        AND created_at > NOW() - INTERVAL '5 minutes';
-    ` as Array<{ players_online: number }>;
+      WHERE game_id = ${params.gameId}
+      ${difficultyFilter};
+    `;
 
-    const best = agg[0]?.best_score;
-    const avg = agg[0]?.avg_score;
-    const playersOnline = Number(online[0]?.players_online ?? 0);
+    const row = rows[0] ?? { best_score: 0, avg_score: 0, players_online: 0 };
 
     return NextResponse.json({
-      gameId,
-      bestScore: best != null ? Math.round(best) : null,
-      avgScore: avg != null ? Math.round(avg) : null,
-      playersOnline,
+      gameId: params.gameId,
+      difficulty: difficulty ?? "All",
+      bestScore: Number(row.best_score ?? 0),
+      avgScore: Number(row.avg_score ?? 0),
+      playersOnline: Number(row.players_online ?? 0),
     });
-  } catch (err) {
-    console.error("GET /api/game-stats failed", err);
+  } catch (e) {
+    console.error("GET /api/game-stats", e);
     return NextResponse.json(
       { error: "Failed to load stats" },
       { status: 500 }

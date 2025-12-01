@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { GameDifficulty } from "@/lib/games";
 
 export type LeaderboardEntry = {
   rank: number;
@@ -10,7 +11,9 @@ export type LeaderboardEntry = {
   game_id: string;
 };
 
-export function useLeaderboard(limit?: number, intervalMs = 8000) {
+type DifficultyFilter = GameDifficulty | "All";
+
+export function useLeaderboard(limit?: number, intervalMs = 8000, difficulty: DifficultyFilter = "All") {
   const [rows, setRows] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
@@ -18,7 +21,10 @@ export function useLeaderboard(limit?: number, intervalMs = 8000) {
 
     async function load() {
       try {
-        const res = await fetch("/api/leaderboard");
+        const url = difficulty === "All" 
+          ? "/api/leaderboard" 
+          : `/api/leaderboard?difficulty=${difficulty}`;
+        const res = await fetch(url);
         if (!res.ok) return;
         const json = await res.json();
         if (cancelled) return;
@@ -35,7 +41,7 @@ export function useLeaderboard(limit?: number, intervalMs = 8000) {
       cancelled = true;
       clearInterval(id);
     };
-  }, [limit, intervalMs]);
+  }, [limit, intervalMs, difficulty]);
 
   return rows;
 }

@@ -12,6 +12,7 @@ import {
 import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
 import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
+import type { GameDifficulty } from "@/lib/games";
 
 type Status = "idle" | "choosing" | "revealed";
 
@@ -22,7 +23,7 @@ type Zone = {
   safety: number;
 };
 
-async function recordDropRun(bestStreak: number) {
+async function recordDropRun(bestStreak: number, difficulty: GameDifficulty) {
   const playerId = getOrCreatePlayerId();
   const playerName = getPlayerName();
   if (!playerId) return;
@@ -41,6 +42,7 @@ async function recordDropRun(bestStreak: number) {
         normalizedScore,
         rawValue: streak,
         rawUnit: "streak",
+        difficulty,
       }),
     });
   } catch (e) {
@@ -62,7 +64,7 @@ function zoneScore(zone: Zone): number {
   return zone.loot * 0.5 + zone.safety * 0.3 + (100 - Math.abs(zone.heat - 60)) * 0.2;
 }
 
-export function DropRoyaleGame() {
+export function DropRoyaleGame({ difficulty }: { difficulty: GameDifficulty }) {
   const [status, setStatus] = useState<Status>("idle");
   const [zones, setZones] = useState<Zone[]>(() => generateZones());
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -150,7 +152,7 @@ export function DropRoyaleGame() {
       onGameCompleted("drop-royale");
       recordGamePlayed("drop-royale");
       // Record run to database (use the updated best streak)
-      void recordDropRun(nextBest);
+      void recordDropRun(nextBest, difficulty);
       return nextBest;
     });
   }

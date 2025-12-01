@@ -5,21 +5,19 @@ import { notFound, useParams } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { GAME_DETAILS } from "@/lib/games";
+import { GAME_DETAILS, type GameDifficulty } from "@/lib/games";
 import { ReactionRushGame } from "@/components/games/ReactionRushGame";
 import { MemoryGridGame } from "@/components/games/MemoryGridGame";
 import { SprayControlGame } from "@/components/games/SprayControlGame";
 import { DropRoyaleGame } from "@/components/games/DropRoyaleGame";
 import { GameStatsCard } from "@/components/GameStatsCard";
-import { DifficultyToggle } from "@/components/game/DifficultyToggle";
-
-type Difficulty = "easy" | "medium" | "hard";
+import { GameDifficultySelector } from "@/components/GameDifficultySelector";
 
 export default function GameDetailPage() {
   const params = useParams();
   const gameId = params.id as string;
   const game = GAME_DETAILS[gameId];
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [difficulty, setDifficulty] = useState<GameDifficulty>("Medium");
 
   if (!game) {
     return notFound();
@@ -38,7 +36,7 @@ export default function GameDetailPage() {
         description={game.tagline}
         rightSlot={
           <div className="flex items-center gap-3">
-            <DifficultyToggle value={difficulty} onChange={setDifficulty} />
+            <GameDifficultySelector value={difficulty} onChange={setDifficulty} />
             <Button>Play now</Button>
           </div>
         }
@@ -68,13 +66,13 @@ export default function GameDetailPage() {
             </p>
             <div className="mt-3">
               {isReactionRush ? (
-                <ReactionRushGame />
+                <ReactionRushGame difficulty={difficulty} />
               ) : isMemoryGrid ? (
-                <MemoryGridGame />
+                <MemoryGridGame difficulty={difficulty} />
               ) : isSprayControl ? (
-                <SprayControlGame />
+                <SprayControlGame difficulty={difficulty} />
               ) : isDropRoyale ? (
-                <DropRoyaleGame />
+                <DropRoyaleGame difficulty={difficulty} />
               ) : (
                 <div className="mt-3 flex h-56 items-center justify-center rounded-2xl border border-surface-border dark:border-[#252530] bg-surface-subtle dark:bg-[#1A1A24] text-[11px] text-ink-subtle dark:text-[#5A5A6A]">
                   Game canvas placeholder
@@ -84,7 +82,7 @@ export default function GameDetailPage() {
           </Card>
         </section>
         <aside className="space-y-4">
-          <GameStatsCard gameId={gameId} difficultyLabel={game.difficulty} />
+          <GameStatsCard gameId={gameId} difficulty={difficulty} />
           <Card>
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle dark:text-[#5A5A6A]">
               Your best runs

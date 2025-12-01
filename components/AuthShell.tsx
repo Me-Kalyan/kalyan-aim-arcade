@@ -8,10 +8,10 @@ import { useToast } from "@/lib/toast";
 import { ArcadeClientProvider } from "@/components/ArcadeClientProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import Dock from "@/components/Dock";
+import { Dock } from "@/components/Dock";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { getPlayerName, hasProfile } from "@/lib/player";
-import { Avatar } from "@/components/ui/Avatar";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { BrandLogo } from "@/components/BrandLogo";
 import {
   VscHome,
@@ -213,7 +213,7 @@ function ShellInner({ children }: { children: ReactNode }) {
               {loggedIn && playerName ? (
                 <>
                   <div className="hidden sm:flex items-center gap-2 text-xs sm:text-sm text-ink-soft dark:text-[#8E8E9E]">
-                    <Avatar name={playerName || "Player"} className="h-6 w-6 text-[10px]" />
+                    <PlayerAvatar name={playerName || "Player"} size="xs" />
                     <span>
                       Signed in as{" "}
                       <span className="font-semibold">
@@ -252,7 +252,7 @@ function ShellInner({ children }: { children: ReactNode }) {
         </div>
       </header>
       {/* Content */}
-      <main className="flex-1 pb-24 sm:pb-6">
+      <main className="flex-1 pb-24 sm:pb-10">
         <PageTransition>
           <div
             className={cn(

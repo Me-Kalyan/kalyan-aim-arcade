@@ -1,15 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
-import { GLOBAL_LEADERBOARD } from "@/lib/games";
+import { type GameDifficulty } from "@/lib/games";
 import { Card } from "@/components/ui/Card";
+import { GameDifficultySelector } from "@/components/GameDifficultySelector";
 import { useArcadeRating } from "@/lib/arcade-rating";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 
+type DifficultyFilter = GameDifficulty | "All";
+
 export default function LeaderboardPage() {
   const rating = useArcadeRating();
-  const entries = useLeaderboard();
+  const [difficulty, setDifficulty] = useState<DifficultyFilter>("All");
+  const entries = useLeaderboard(undefined, 8000, difficulty);
 
   const hasRating = rating.combinedScore != null;
 
@@ -29,19 +34,25 @@ export default function LeaderboardPage() {
         title="Global ranking across all games."
         description="Later you can filter by game, region or friends. For now this is a combined global view."
         rightSlot={
-          <div className="flex gap-2 text-[11px]">
-            <select className="h-9 rounded-pill border border-surface-border dark:border-[#252530] bg-surface-card dark:bg-[#13131A] px-3 text-xs text-ink-primary dark:text-[#F5F5F5] outline-none transition-colors duration-200">
-              <option>All games</option>
-              <option>Reaction Rush</option>
-              <option>Memory Grid</option>
-              <option>Spray Control</option>
-              <option>Drop Royale</option>
-            </select>
-            <select className="h-9 rounded-pill border border-surface-border dark:border-[#252530] bg-surface-card dark:bg-[#13131A] px-3 text-xs text-ink-primary dark:text-[#F5F5F5] outline-none transition-colors duration-200">
-              <option>Global</option>
-              <option>Friends</option>
-              <option>This week</option>
-            </select>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-ink-muted dark:text-[#B8B8C8]">Difficulty</span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                  difficulty === "All"
+                    ? "bg-brand-pink-500 text-white shadow-[0_0_14px_rgba(255,77,219,0.7)]"
+                    : "text-ink-muted bg-surface-subtle dark:bg-[#1A1A24] hover:bg-white/10 dark:hover:bg-white/10"
+                }`}
+                onClick={() => setDifficulty("All")}
+              >
+                All
+              </button>
+              <GameDifficultySelector
+                value={difficulty === "All" ? "Medium" : difficulty}
+                onChange={(d) => setDifficulty(d)}
+              />
+            </div>
           </div>
         }
       />
@@ -110,7 +121,7 @@ export default function LeaderboardPage() {
         </div>
       </Card>
       {/* Global leaderboard */}
-      <LeaderboardTable entries={tableEntries.length > 0 ? tableEntries : GLOBAL_LEADERBOARD} />
+      <LeaderboardTable entries={tableEntries} />
     </div>
   );
 }

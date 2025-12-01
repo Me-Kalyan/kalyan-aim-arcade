@@ -83,7 +83,7 @@ export default function HomePage() {
   const statsSC = useGameStats("spray-control");
   const statsDR = useGameStats("drop-royale");
 
-  const topPlayers = useLeaderboard(4);
+  const topPlayers = useLeaderboard(4, 8000, "All");
   const router = useRouter();
 
   function handleStartWarmup() {

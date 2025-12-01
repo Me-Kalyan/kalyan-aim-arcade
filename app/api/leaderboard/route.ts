@@ -1,8 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import type { GameDifficulty } from "@/lib/games";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const searchParams = req.nextUrl.searchParams;
+    const difficultyParam = searchParams.get("difficulty");
+    
+    type DifficultyFilter = GameDifficulty | "All";
+    const difficulty: DifficultyFilter = 
+      difficultyParam === "Easy" || difficultyParam === "Hard" 
+        ? difficultyParam 
+        : difficultyParam === "All" 
+        ? "All" 
+        : "All";
+
+    // Build difficulty filter
+    const difficultyFilter = 
+      difficulty === "All" 
+        ? sql`` 
+        : sql`AND r.difficulty = ${difficulty}`;
+
     const rows = await sql`
       SELECT
         player_id,
@@ -14,6 +32,8 @@ export async function GET() {
         MIN(game_id)          AS game_id,
         DENSE_RANK() OVER (ORDER BY MAX(normalized_score) DESC) AS rank
       FROM runs r
+      WHERE 1=1
+      ${difficultyFilter}
       GROUP BY player_id
       ORDER BY best_score DESC
       LIMIT 100;

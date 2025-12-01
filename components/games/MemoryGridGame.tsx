@@ -12,12 +12,13 @@ import {
 import { useSessionSummary } from "@/lib/session-summary";
 import { usePlaylist } from "@/lib/playlist";
 import { getOrCreatePlayerId, getPlayerName } from "@/lib/player";
+import type { GameDifficulty } from "@/lib/games";
 
 type Status = "idle" | "showing" | "input" | "result";
 
 const GRID_SIZE = 9;
 
-async function recordMemoryRun(accuracyPct: number) {
+async function recordMemoryRun(accuracyPct: number, difficulty: GameDifficulty) {
   const playerId = getOrCreatePlayerId();
   const playerName = getPlayerName();
   if (!playerId) return;
@@ -36,6 +37,7 @@ async function recordMemoryRun(accuracyPct: number) {
         normalizedScore,
         rawValue: clamped,
         rawUnit: "%",
+        difficulty,
       }),
     });
   } catch (e) {
@@ -51,7 +53,7 @@ function makePattern(length: number): number[] {
   return Array.from(indices);
 }
 
-export function MemoryGridGame() {
+export function MemoryGridGame({ difficulty }: { difficulty: GameDifficulty }) {
   const [status, setStatus] = useState<Status>("idle");
   const [level, setLevel] = useState(1);
   const [pattern, setPattern] = useState<number[]>([]);
@@ -148,7 +150,7 @@ export function MemoryGridGame() {
       finishRound(pct);
       recordGamePlayed("memory-grid");
       // Record run to database
-      void recordMemoryRun(pct);
+      void recordMemoryRun(pct, difficulty);
       return nextBest;
     });
 
