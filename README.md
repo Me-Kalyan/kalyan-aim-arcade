@@ -1,6 +1,6 @@
-# Streamero Arcade
+# Kalyan Aim Arcade
 
-A gaming app built with Next.js, TypeScript, and Tailwind CSS featuring mini games and leaderboards with a streaming-style design.
+A gaming app built with Next.js, TypeScript, and Tailwind CSS featuring aim training mini games and leaderboards with a streaming-style design.
 
 ## Getting Started
 
@@ -29,4 +29,11 @@ npm run dev
 - Global leaderboard
 - Streaming-style design system
 - Responsive layout
+
+## Branding
+
+- Primary logo: `/public/logo-512.png`
+- Social share image: `/public/logo-social-1200x630.png`
+- Favicon set: `/public/favicon-16x16.png`, `/public/favicon-32x32.png`, `/public/favicon.ico`
+- PWA icons: `/public/android-chrome-192x192.png`, `/public/android-chrome-512x512.png`
 

@@ -12,6 +12,7 @@ import Dock from "@/components/Dock";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { getPlayerName, hasProfile } from "@/lib/player";
 import { Avatar } from "@/components/ui/Avatar";
+import { BrandLogo } from "@/components/BrandLogo";
 import {
   VscHome,
   VscGame,
@@ -179,19 +180,7 @@ function ShellInner({ children }: { children: ReactNode }) {
           className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2 sm:px-6 sm:py-3"
         >
           {/* Brand */}
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-pink-500 to-brand-pink-400 text-xs font-extrabold tracking-tight text-surface-card shadow-brand">
-              SA
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold tracking-tight">
-                Streamero Arcade
-              </span>
-              <span className="text-[11px] text-ink-soft">
-                Mini games · Leaderboards
-              </span>
-            </div>
-          </div>
+          <BrandLogo />
           {/* Nav + auth + settings */}
           <div className="flex items-center gap-3">
             <nav className="hidden md:flex gap-1 text-xs font-medium text-ink-muted dark:text-[#B8B8C8]">
@@ -284,7 +273,7 @@ function ShellInner({ children }: { children: ReactNode }) {
           )}
         >
           <span className="text-ink-soft dark:text-[#8E8E9E]">
-            © {new Date().getFullYear()} Streamero Arcade
+            © {new Date().getFullYear()} Kalyan Aim Arcade
           </span>
           <span className="flex gap-3">
             <a
