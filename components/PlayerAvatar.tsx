@@ -10,7 +10,7 @@ type PlayerAvatarProps = {
   className?: string;
 };
 
-const sizeMap: Record<PlayerAvatarProps["size"], string> = {
+const sizeMap: Record<NonNullable<PlayerAvatarProps["size"]>, string> = {
   xs: "h-6 w-6 text-[10px]",
   sm: "h-8 w-8 text-xs",
   md: "h-10 w-10 text-sm",
