@@ -14,11 +14,7 @@ export async function GET(
     : sql``;
 
   try {
-    const rows = await sql<{
-      best_score: number | null;
-      avg_score: number | null;
-      players_online: number;
-    }>`
+    const rows = await sql`
       SELECT
         MAX(normalized_score)      AS best_score,
         AVG(normalized_score)      AS avg_score,
@@ -26,7 +22,11 @@ export async function GET(
       FROM runs
       WHERE game_id = ${params.gameId}
       ${difficultyFilter};
-    `;
+    ` as Array<{
+      best_score: number | null;
+      avg_score: number | null;
+      players_online: number;
+    }>;
 
     const row = rows[0] ?? { best_score: 0, avg_score: 0, players_online: 0 };
 
